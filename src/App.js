@@ -48,14 +48,6 @@ function App() {
           encoding: "base64",
       },
   ];
-    await createGithubCommit(
-        githubAccessToken,
-        'testingStuff',
-        'testBranch',
-        'testing commit',
-        articleFiles
-    );
-    alert("successful")
   }
   return (
     <div className="App">
