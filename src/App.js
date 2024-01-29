@@ -1,8 +1,11 @@
 import logo from './logo.svg';
 import './App.css';
 import { Octokit } from '@octokit/core'
+import axios from "axios";
+import { useEffect, useState } from 'react';
 
 function App() {
+  const [code, setcode] = useState();
   let _repoName = '';
   const githubAccessToken = ''
   const octokit = new Octokit({ auth: githubAccessToken });
@@ -15,6 +18,25 @@ function App() {
       viewer.srcdoc = htmlCode;
     });
   });
+
+  useEffect(() => {
+    const qs = window.location.search;
+    const urlParam = new URLSearchParams(qs);
+    const c = urlParam.get("code");
+    console.log(c);
+
+    setcode(c);
+    if (c != null) {
+      axios.post("https://github.com/login/oauth/access_token", {
+        client_id: "903b8de041df84610191",
+        client_secret: "",
+        code: c
+      })
+        .then((response) => {
+          console.log(response);
+        });
+    }
+  }, []);
 
   const createGitHubRepo = async (repoName, repoDescription) => {
     try {
@@ -49,7 +71,7 @@ function App() {
     console.log(result);
   }
 
-  const createGithubPage = async() => {
+  const createGithubPage = async () => {
     await octokit.request('POST /repos/JiginJayaprakash/testingStuff/pages', {
       owner: 'JiginJayaprakash',
       repo: 'testingStuff',
@@ -62,8 +84,8 @@ function App() {
       }
     })
   }
-  const triggerGithubBuild = async() => {
-   let result = await octokit.request('POST /repos/JiginJayaprakash/testingStuff/pages/builds', {
+  const triggerGithubBuild = async () => {
+    let result = await octokit.request('POST /repos/JiginJayaprakash/testingStuff/pages/builds', {
       owner: 'JiginJayaprakash',
       repo: 'testingStuff',
       headers: {
@@ -72,8 +94,8 @@ function App() {
     })
   }
 
-  const getLatestBuild = async() => {
-   const result =  await octokit.request('GET /repos/{owner}/{repo}/pages/builds/latest', {
+  const getLatestBuild = async () => {
+    const result = await octokit.request('GET /repos/{owner}/{repo}/pages/builds/latest', {
       owner: 'OWNER',
       repo: 'REPO',
       headers: {
@@ -89,9 +111,14 @@ function App() {
     await pushFilestoRepo();
     await createGithubPage();
   }
+
+  const login = async () => {
+    window.location.href = "https://github.com/login/oauth/authorize?client_id=903b8de041df84610191"
+  }
   return (
     <div className="App">
       <header className="App-header">
+        <button onClick={login}>login</button>
         <button onClick={test}>Take the shot!</button>
         <div id="editor-container">
           <textarea id="editor" placeholder="Enter HTML code..."></textarea>
